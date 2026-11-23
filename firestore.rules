@@ -1,0 +1,392 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() >= 1 && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function isBootstrappedAdmin() {
+      return isSignedIn() &&
+             request.auth.token.email in ['papis1730jj@gmail.com', 'tabordaedith09@gmail.com'] &&
+             request.auth.token.email_verified == true;
+    }
+
+    function isAdmin() {
+      return isBootstrappedAdmin() ||
+             (isSignedIn() && exists(/databases/$(database)/documents/admins/$(request.auth.uid)));
+    }
+
+    function isValidUserAccessProfile(data) {
+      return data.userId is string && data.userId.size() >= 1 && data.userId.size() <= 128 &&
+             data.email is string && data.email.size() <= 200 &&
+             data.displayName is string && data.displayName.size() >= 1 && data.displayName.size() <= 80 &&
+             data.role in ['ADMIN', 'DEVELOPER', 'OPERATOR', 'VIEWER'] &&
+             data.permissions is list && data.permissions.size() <= 10 &&
+             data.permissions.hasOnly([
+               'PKG_INSPECT',
+               'PKG_MODIFY',
+               'FTP_CONSOLE',
+               'DEV_VCS_CICD',
+               'DIAGNOSTICS_LOGS',
+               'APP_UPDATES',
+               'MANAGE_ROLES'
+             ]) &&
+             data.activeStatus in ['ACTIVE', 'SUSPENDED'] &&
+             data.updatedBy is string && data.updatedBy.size() <= 128 &&
+             data.createdAt is timestamp && data.createdAt <= request.time &&
+             data.updatedAt is timestamp && data.updatedAt <= request.time;
+    }
+
+    function isValidAdminRecord(data) {
+      return data.userId is string && data.userId.size() >= 1 && data.userId.size() <= 128 &&
+             data.grantedBy is string && data.grantedBy.size() >= 1 && data.grantedBy.size() <= 128 &&
+             data.createdAt is timestamp && data.createdAt <= request.time;
+    }
+
+    function isValidActivityLog(data) {
+      return data.userId is string && data.userId.size() >= 1 && data.userId.size() <= 128 &&
+             data.category in ['PKG', 'FTP', 'VCS', 'RBAC', 'DIAGNOSTICS', 'UPDATE', 'SYSTEM', 'STORE'] &&
+             data.severity in ['INFO', 'WARN', 'ERROR'] &&
+             data.action is string && data.action.size() >= 1 && data.action.size() <= 100 &&
+             data.details is string && data.details.size() <= 500 &&
+             data.actorEmail is string && data.actorEmail.size() <= 200 &&
+             data.createdAt is timestamp && data.createdAt <= request.time;
+    }
+
+    function isValidConsoleProfile(data) {
+      return data.userId is string && data.userId.size() >= 1 && data.userId.size() <= 128 &&
+             data.name is string && data.name.size() >= 1 && data.name.size() <= 60 &&
+             data.host is string && data.host.size() >= 1 && data.host.size() <= 100 &&
+             data.port is int && data.port >= 1 && data.port <= 65535 &&
+             data.binLoaderPort is int && data.binLoaderPort >= 1 && data.binLoaderPort <= 65535 &&
+             data.klogPort is int && data.klogPort >= 1 && data.klogPort <= 65535 &&
+             data.username is string && data.username.size() <= 64 &&
+             data.firmwareVersion is string && data.firmwareVersion.size() <= 20 &&
+             data.notes is string && data.notes.size() <= 240 &&
+             data.createdAt is timestamp && data.createdAt <= request.time &&
+             data.updatedAt is timestamp && data.updatedAt <= request.time;
+    }
+
+    function isValidVcsConfig(data) {
+      return data.userId is string && data.userId.size() >= 1 && data.userId.size() <= 128 &&
+             data.provider in ['GITHUB', 'GITLAB', 'CUSTOM'] &&
+             data.owner is string && data.owner.size() >= 1 && data.owner.size() <= 80 &&
+             data.repo is string && data.repo.size() >= 1 && data.repo.size() <= 100 &&
+             data.branch is string && data.branch.size() >= 1 && data.branch.size() <= 80 &&
+             data.workflowFile is string && data.workflowFile.size() <= 120 &&
+             data.deployEnvironment is string && data.deployEnvironment.size() <= 60 &&
+             data.lastStatus is string && data.lastStatus.size() <= 40 &&
+             data.createdAt is timestamp && data.createdAt <= request.time &&
+             data.updatedAt is timestamp && data.updatedAt <= request.time;
+    }
+
+    function isValidAppRelease(data) {
+      return data.versionCode is int && data.versionCode >= 1 && data.versionCode <= 999999 &&
+             data.versionName is string && data.versionName.size() >= 1 && data.versionName.size() <= 30 &&
+             data.channel in ['STABLE', 'BETA', 'NIGHTLY'] &&
+             data.publishedStatus in ['PUBLISHED', 'DRAFT'] &&
+             data.changelog is string && data.changelog.size() >= 1 && data.changelog.size() <= 1000 &&
+             data.downloadUrl is string && data.downloadUrl.size() >= 1 && data.downloadUrl.size() <= 500 &&
+             data.checksumSha256 is string && data.checksumSha256.size() <= 128 &&
+             data.requiredUpdate is bool &&
+             data.publishedBy is string && data.publishedBy.size() >= 1 && data.publishedBy.size() <= 128 &&
+             data.createdAt is timestamp && data.createdAt <= request.time &&
+             data.updatedAt is timestamp && data.updatedAt <= request.time;
+    }
+
+    function isValidAuditEvent(data) {
+      return data.actorUid is string && data.actorUid.size() >= 1 && data.actorUid.size() <= 128 &&
+             data.actorEmail is string && data.actorEmail.size() <= 200 &&
+             data.targetUid is string && data.targetUid.size() >= 1 && data.targetUid.size() <= 128 &&
+             data.targetEmail is string && data.targetEmail.size() <= 200 &&
+             data.eventType in ['ROLE_CHANGED', 'PERMISSIONS_UPDATED', 'STATUS_CHANGED', 'RELEASE_PUBLISHED'] &&
+             data.summary is string && data.summary.size() >= 1 && data.summary.size() <= 300 &&
+             data.createdAt is timestamp && data.createdAt <= request.time;
+    }
+
+    function isStorePublisher() {
+      return isAdmin() || (
+        isSignedIn() &&
+        exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role in ['ADMIN', 'DEVELOPER'] &&
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.activeStatus == 'ACTIVE'
+      );
+    }
+
+    function isValidStoreItem(data) {
+      return data.title is string && data.title.size() >= 1 && data.title.size() <= 100 &&
+             data.category in ['TEXTURE', 'MOD', 'SCRIPT', 'PKG', 'MODEL_3D', 'PAYLOAD'] &&
+             data.gameTitle is string && data.gameTitle.size() >= 1 && data.gameTitle.size() <= 80 &&
+             data.titleId is string && data.titleId.size() <= 16 &&
+             data.version is string && data.version.size() >= 1 && data.version.size() <= 30 &&
+             data.fileName is string && data.fileName.size() >= 1 && data.fileName.size() <= 120 &&
+             data.targetConsolePath is string && data.targetConsolePath.matches('^/[a-zA-Z0-9_./\\-]{1,180}$') &&
+             !data.targetConsolePath.matches('.*\\.\\..*') &&
+             data.downloadUrl is string && data.downloadUrl.size() <= 500 &&
+             (data.downloadUrl == '' || data.downloadUrl.matches('^https://.*')) &&
+             data.inlineContent is string && data.inlineContent.size() <= 16000 &&
+             (data.downloadUrl.size() > 8 || data.inlineContent.size() > 0) &&
+             data.sha256 is string && data.sha256.size() <= 128 &&
+             data.sizeBytes is int && data.sizeBytes >= 0 && data.sizeBytes <= 20000000000 &&
+             data.description is string && data.description.size() <= 600 &&
+             data.publishedStatus in ['PUBLISHED', 'DRAFT'] &&
+             data.authorUid is string && data.authorUid.size() >= 1 && data.authorUid.size() <= 128 &&
+             data.authorEmail is string && data.authorEmail.size() <= 200 &&
+             data.createdAt is timestamp && data.createdAt <= request.time &&
+             data.updatedAt is timestamp && data.updatedAt <= request.time;
+    }
+
+    match /users/{userId} {
+      allow get: if isSignedIn() && isValidId(userId) && (request.auth.uid == userId || isAdmin());
+      allow list: if isAdmin();
+
+      allow create: if isSignedIn() &&
+                       isValidId(userId) &&
+                       request.auth.uid == userId &&
+                       incoming().userId == request.auth.uid &&
+                       incoming().keys().hasAll([
+                         'userId', 'email', 'displayName', 'role', 'permissions',
+                         'activeStatus', 'updatedBy', 'createdAt', 'updatedAt'
+                       ]) &&
+                       incoming().keys().hasOnly([
+                         'userId', 'email', 'displayName', 'role', 'permissions',
+                         'activeStatus', 'updatedBy', 'createdAt', 'updatedAt'
+                       ]) &&
+                       isValidUserAccessProfile(incoming()) &&
+                       (
+                         isBootstrappedAdmin() ||
+                         (
+                           incoming().role == 'VIEWER' &&
+                           incoming().permissions.size() <= 1 &&
+                           incoming().permissions.hasOnly(['PKG_INSPECT']) &&
+                           incoming().activeStatus == 'ACTIVE'
+                         )
+                       );
+
+      allow update: if isSignedIn() &&
+                       isValidId(userId) &&
+                       isValidUserAccessProfile(incoming()) &&
+                       incoming().userId == existing().userId &&
+                       incoming().createdAt == existing().createdAt &&
+                       (
+                         (
+                           isAdmin() &&
+                           incoming().diff(existing()).affectedKeys().hasOnly([
+                             'displayName', 'role', 'permissions', 'activeStatus', 'updatedBy', 'updatedAt'
+                           ])
+                         ) ||
+                         (
+                           request.auth.uid == userId &&
+                           incoming().diff(existing()).affectedKeys().hasOnly(['displayName', 'updatedAt'])
+                         )
+                       );
+
+      allow delete: if isAdmin() && isValidId(userId);
+
+      match /activity_logs/{logId} {
+        allow get: if isSignedIn() && isValidId(userId) && isValidId(logId) && (request.auth.uid == userId || isAdmin());
+        allow list: if isSignedIn() && isValidId(userId) && (request.auth.uid == userId || isAdmin());
+
+        allow create: if isSignedIn() &&
+                         isValidId(userId) &&
+                         isValidId(logId) &&
+                         request.auth.uid == userId &&
+                         incoming().userId == userId &&
+                         incoming().keys().hasAll(['userId', 'category', 'severity', 'action', 'details', 'actorEmail', 'createdAt']) &&
+                         incoming().keys().hasOnly(['userId', 'category', 'severity', 'action', 'details', 'actorEmail', 'createdAt']) &&
+                         isValidActivityLog(incoming());
+
+        allow update: if false;
+        allow delete: if isSignedIn() && isValidId(userId) && isValidId(logId) && (request.auth.uid == userId || isAdmin());
+      }
+
+      match /console_profiles/{profileId} {
+        allow get: if isSignedIn() && isValidId(userId) && isValidId(profileId) && request.auth.uid == userId;
+        allow list: if isSignedIn() && isValidId(userId) && request.auth.uid == userId;
+
+        allow create: if isSignedIn() &&
+                         isValidId(userId) &&
+                         isValidId(profileId) &&
+                         request.auth.uid == userId &&
+                         incoming().userId == userId &&
+                         incoming().keys().hasAll([
+                           'userId', 'name', 'host', 'port', 'binLoaderPort', 'klogPort',
+                           'username', 'firmwareVersion', 'notes', 'createdAt', 'updatedAt'
+                         ]) &&
+                         incoming().keys().hasOnly([
+                           'userId', 'name', 'host', 'port', 'binLoaderPort', 'klogPort',
+                           'username', 'firmwareVersion', 'notes', 'createdAt', 'updatedAt'
+                         ]) &&
+                         isValidConsoleProfile(incoming());
+
+        allow update: if isSignedIn() &&
+                         isValidId(userId) &&
+                         isValidId(profileId) &&
+                         request.auth.uid == userId &&
+                         isValidConsoleProfile(incoming()) &&
+                         incoming().userId == existing().userId &&
+                         incoming().createdAt == existing().createdAt &&
+                         incoming().diff(existing()).affectedKeys().hasOnly([
+                           'name', 'host', 'port', 'binLoaderPort', 'klogPort',
+                           'username', 'firmwareVersion', 'notes', 'updatedAt'
+                         ]);
+
+        allow delete: if isSignedIn() && isValidId(userId) && isValidId(profileId) && request.auth.uid == userId;
+      }
+
+      match /vcs_configs/{configId} {
+        allow get: if isSignedIn() && isValidId(userId) && isValidId(configId) && request.auth.uid == userId;
+        allow list: if isSignedIn() && isValidId(userId) && request.auth.uid == userId;
+
+        allow create: if isSignedIn() &&
+                         isValidId(userId) &&
+                         isValidId(configId) &&
+                         request.auth.uid == userId &&
+                         incoming().userId == userId &&
+                         incoming().keys().hasAll([
+                           'userId', 'provider', 'owner', 'repo', 'branch',
+                           'workflowFile', 'deployEnvironment', 'lastStatus', 'createdAt', 'updatedAt'
+                         ]) &&
+                         incoming().keys().hasOnly([
+                           'userId', 'provider', 'owner', 'repo', 'branch',
+                           'workflowFile', 'deployEnvironment', 'lastStatus', 'createdAt', 'updatedAt'
+                         ]) &&
+                         isValidVcsConfig(incoming());
+
+        allow update: if isSignedIn() &&
+                         isValidId(userId) &&
+                         isValidId(configId) &&
+                         request.auth.uid == userId &&
+                         isValidVcsConfig(incoming()) &&
+                         incoming().userId == existing().userId &&
+                         incoming().createdAt == existing().createdAt &&
+                         incoming().diff(existing()).affectedKeys().hasOnly([
+                           'provider', 'owner', 'repo', 'branch',
+                           'workflowFile', 'deployEnvironment', 'lastStatus', 'updatedAt'
+                         ]);
+
+        allow delete: if isSignedIn() && isValidId(userId) && isValidId(configId) && request.auth.uid == userId;
+      }
+    }
+
+    match /admins/{adminUid} {
+      allow get: if isSignedIn() && isValidId(adminUid) && (request.auth.uid == adminUid || isAdmin());
+      allow list: if isAdmin();
+
+      allow create: if isAdmin() &&
+                       isValidId(adminUid) &&
+                       incoming().userId == adminUid &&
+                       incoming().keys().hasAll(['userId', 'grantedBy', 'createdAt']) &&
+                       incoming().keys().hasOnly(['userId', 'grantedBy', 'createdAt']) &&
+                       isValidAdminRecord(incoming());
+
+      allow update: if false;
+      allow delete: if isAdmin() && isValidId(adminUid);
+    }
+
+    match /app_releases/{releaseId} {
+      allow get: if isSignedIn() && isValidId(releaseId) && (existing().publishedStatus == 'PUBLISHED' || isAdmin());
+      allow list: if isAdmin() || (isSignedIn() && resource.data.publishedStatus == 'PUBLISHED');
+
+      allow create: if isAdmin() &&
+                       isValidId(releaseId) &&
+                       incoming().keys().hasAll([
+                         'versionCode', 'versionName', 'channel', 'publishedStatus',
+                         'changelog', 'downloadUrl', 'checksumSha256', 'requiredUpdate',
+                         'publishedBy', 'createdAt', 'updatedAt'
+                       ]) &&
+                       incoming().keys().hasOnly([
+                         'versionCode', 'versionName', 'channel', 'publishedStatus',
+                         'changelog', 'downloadUrl', 'checksumSha256', 'requiredUpdate',
+                         'publishedBy', 'createdAt', 'updatedAt'
+                       ]) &&
+                       isValidAppRelease(incoming());
+
+      allow update: if isAdmin() &&
+                       isValidId(releaseId) &&
+                       isValidAppRelease(incoming()) &&
+                       incoming().createdAt == existing().createdAt &&
+                       incoming().publishedBy == existing().publishedBy &&
+                       incoming().diff(existing()).affectedKeys().hasOnly([
+                         'versionCode', 'versionName', 'channel', 'publishedStatus',
+                         'changelog', 'downloadUrl', 'checksumSha256', 'requiredUpdate', 'updatedAt'
+                       ]);
+
+      allow delete: if isAdmin() && isValidId(releaseId);
+    }
+
+    match /audit_events/{eventId} {
+      allow get: if isAdmin() && isValidId(eventId);
+      allow list: if isAdmin();
+
+      allow create: if isAdmin() &&
+                       isValidId(eventId) &&
+                       incoming().actorUid == request.auth.uid &&
+                       incoming().keys().hasAll([
+                         'actorUid', 'actorEmail', 'targetUid', 'targetEmail',
+                         'eventType', 'summary', 'createdAt'
+                       ]) &&
+                       incoming().keys().hasOnly([
+                         'actorUid', 'actorEmail', 'targetUid', 'targetEmail',
+                         'eventType', 'summary', 'createdAt'
+                       ]) &&
+                       isValidAuditEvent(incoming());
+
+      allow update: if false;
+      allow delete: if false;
+    }
+
+    match /store_items/{itemId} {
+      allow get: if isSignedIn() && isValidId(itemId) && (existing().publishedStatus == 'PUBLISHED' || isAdmin());
+      allow list: if isAdmin() || (isSignedIn() && resource.data.publishedStatus == 'PUBLISHED');
+
+      allow create: if isStorePublisher() &&
+                       isValidId(itemId) &&
+                       incoming().authorUid == request.auth.uid &&
+                       incoming().keys().hasAll([
+                         'title', 'category', 'gameTitle', 'titleId', 'version',
+                         'fileName', 'targetConsolePath', 'downloadUrl', 'inlineContent',
+                         'sha256', 'sizeBytes', 'description', 'publishedStatus',
+                         'authorUid', 'authorEmail', 'createdAt', 'updatedAt'
+                       ]) &&
+                       incoming().keys().hasOnly([
+                         'title', 'category', 'gameTitle', 'titleId', 'version',
+                         'fileName', 'targetConsolePath', 'downloadUrl', 'inlineContent',
+                         'sha256', 'sizeBytes', 'description', 'publishedStatus',
+                         'authorUid', 'authorEmail', 'createdAt', 'updatedAt'
+                       ]) &&
+                       isValidStoreItem(incoming());
+
+      allow update: if isStorePublisher() &&
+                       isValidId(itemId) &&
+                       (isAdmin() || existing().authorUid == request.auth.uid) &&
+                       isValidStoreItem(incoming()) &&
+                       incoming().createdAt == existing().createdAt &&
+                       incoming().authorUid == existing().authorUid &&
+                       incoming().diff(existing()).affectedKeys().hasOnly([
+                         'title', 'category', 'gameTitle', 'titleId', 'version',
+                         'fileName', 'targetConsolePath', 'downloadUrl', 'inlineContent',
+                         'sha256', 'sizeBytes', 'description', 'publishedStatus', 'updatedAt'
+                       ]);
+
+      allow delete: if isValidId(itemId) && (isAdmin() || (isStorePublisher() && existing().authorUid == request.auth.uid));
+    }
+  }
+}

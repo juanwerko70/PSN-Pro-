@@ -1,0 +1,177 @@
+{
+  "entities": {
+    "UserAccessProfile": {
+      "title": "UserAccessProfile",
+      "description": "User RBAC profile storing role, granular feature permissions, and active status.",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string", "description": "Firebase Auth UID matching document ID" },
+        "email": { "type": "string", "description": "User email address" },
+        "displayName": { "type": "string", "description": "Display name" },
+        "role": { "type": "string", "enum": ["ADMIN", "DEVELOPER", "OPERATOR", "VIEWER"] },
+        "permissions": { "type": "array", "description": "Bounded list of granted AppPermission names" },
+        "activeStatus": { "type": "string", "enum": ["ACTIVE", "SUSPENDED"] },
+        "updatedBy": { "type": "string", "description": "UID of admin or user who last updated" },
+        "createdAt": { "type": "string", "format": "date-time", "description": "Server timestamp" },
+        "updatedAt": { "type": "string", "format": "date-time", "description": "Server timestamp" }
+      },
+      "required": ["userId", "email", "displayName", "role", "permissions", "activeStatus", "updatedBy", "createdAt", "updatedAt"]
+    },
+    "AdminRecord": {
+      "title": "AdminRecord",
+      "description": "Authoritative admin membership marker keyed by UID.",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "grantedBy": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["userId", "grantedBy", "createdAt"]
+    },
+    "ActivityLogEntry": {
+      "title": "ActivityLogEntry",
+      "description": "Immutable activity and diagnostic audit entry scoped to user.",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "category": { "type": "string", "enum": ["PKG", "FTP", "VCS", "RBAC", "DIAGNOSTICS", "UPDATE", "SYSTEM", "STORE"] },
+        "severity": { "type": "string", "enum": ["INFO", "WARN", "ERROR"] },
+        "action": { "type": "string" },
+        "details": { "type": "string" },
+        "actorEmail": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["userId", "category", "severity", "action", "details", "actorEmail", "createdAt"]
+    },
+    "ConsoleProfile": {
+      "title": "ConsoleProfile",
+      "description": "Saved PS4 console FTP and payload target configuration.",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "name": { "type": "string" },
+        "host": { "type": "string" },
+        "port": { "type": "integer" },
+        "binLoaderPort": { "type": "integer" },
+        "klogPort": { "type": "integer" },
+        "username": { "type": "string" },
+        "firmwareVersion": { "type": "string" },
+        "notes": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["userId", "name", "host", "port", "binLoaderPort", "klogPort", "username", "firmwareVersion", "notes", "createdAt", "updatedAt"]
+    },
+    "VcsConfig": {
+      "title": "VcsConfig",
+      "description": "Saved Version Control & CI/CD repository configuration.",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "provider": { "type": "string", "enum": ["GITHUB", "GITLAB", "CUSTOM"] },
+        "owner": { "type": "string" },
+        "repo": { "type": "string" },
+        "branch": { "type": "string" },
+        "workflowFile": { "type": "string" },
+        "deployEnvironment": { "type": "string" },
+        "lastStatus": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["userId", "provider", "owner", "repo", "branch", "workflowFile", "deployEnvironment", "lastStatus", "createdAt", "updatedAt"]
+    },
+    "AppRelease": {
+      "title": "AppRelease",
+      "description": "Published application update metadata for real-time update notifications.",
+      "type": "object",
+      "properties": {
+        "versionCode": { "type": "integer" },
+        "versionName": { "type": "string" },
+        "channel": { "type": "string", "enum": ["STABLE", "BETA", "NIGHTLY"] },
+        "publishedStatus": { "type": "string", "enum": ["PUBLISHED", "DRAFT"] },
+        "changelog": { "type": "string" },
+        "downloadUrl": { "type": "string" },
+        "checksumSha256": { "type": "string" },
+        "requiredUpdate": { "type": "boolean" },
+        "publishedBy": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["versionCode", "versionName", "channel", "publishedStatus", "changelog", "downloadUrl", "checksumSha256", "requiredUpdate", "publishedBy", "createdAt", "updatedAt"]
+    },
+    "AuditEvent": {
+      "title": "AuditEvent",
+      "description": "Immutable admin RBAC & release audit trail event.",
+      "type": "object",
+      "properties": {
+        "actorUid": { "type": "string" },
+        "actorEmail": { "type": "string" },
+        "targetUid": { "type": "string" },
+        "targetEmail": { "type": "string" },
+        "eventType": { "type": "string", "enum": ["ROLE_CHANGED", "PERMISSIONS_UPDATED", "STATUS_CHANGED", "RELEASE_PUBLISHED"] },
+        "summary": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["actorUid", "actorEmail", "targetUid", "targetEmail", "eventType", "summary", "createdAt"]
+    },
+    "StoreItem": {
+      "title": "StoreItem",
+      "description": "Downloadable PS4 store catalog entry (textures, mods, scripts, PKGs, payloads, 3D models).",
+      "type": "object",
+      "properties": {
+        "title": { "type": "string" },
+        "category": { "type": "string", "enum": ["TEXTURE", "MOD", "SCRIPT", "PKG", "MODEL_3D", "PAYLOAD"] },
+        "gameTitle": { "type": "string" },
+        "titleId": { "type": "string" },
+        "version": { "type": "string" },
+        "fileName": { "type": "string" },
+        "targetConsolePath": { "type": "string" },
+        "downloadUrl": { "type": "string" },
+        "inlineContent": { "type": "string" },
+        "sha256": { "type": "string" },
+        "sizeBytes": { "type": "integer" },
+        "description": { "type": "string" },
+        "publishedStatus": { "type": "string", "enum": ["PUBLISHED", "DRAFT"] },
+        "authorUid": { "type": "string" },
+        "authorEmail": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["title", "category", "gameTitle", "titleId", "version", "fileName", "targetConsolePath", "downloadUrl", "inlineContent", "sha256", "sizeBytes", "description", "publishedStatus", "authorUid", "authorEmail", "createdAt", "updatedAt"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": { "$ref": "#/entities/UserAccessProfile" },
+      "description": "User RBAC profiles with real-time permission & role syncing."
+    },
+    "/admins/{adminUid}": {
+      "schema": { "$ref": "#/entities/AdminRecord" },
+      "description": "Trusted admin lookup documents."
+    },
+    "/users/{userId}/activity_logs/{logId}": {
+      "schema": { "$ref": "#/entities/ActivityLogEntry" },
+      "description": "Per-user detailed activity logs."
+    },
+    "/users/{userId}/console_profiles/{profileId}": {
+      "schema": { "$ref": "#/entities/ConsoleProfile" },
+      "description": "Saved PS4 console FTP/debug profiles."
+    },
+    "/users/{userId}/vcs_configs/{configId}": {
+      "schema": { "$ref": "#/entities/VcsConfig" },
+      "description": "Saved VCS & CI/CD repository configurations."
+    },
+    "/app_releases/{releaseId}": {
+      "schema": { "$ref": "#/entities/AppRelease" },
+      "description": "App release metadata for in-app update notifications."
+    },
+    "/audit_events/{eventId}": {
+      "schema": { "$ref": "#/entities/AuditEvent" },
+      "description": "Admin RBAC & release security audit trail."
+    },
+    "/store_items/{itemId}": {
+      "schema": { "$ref": "#/entities/StoreItem" },
+      "description": "Shared cloud store catalog for PS4 textures, mods, scripts, PKGs, payloads & 3D assets."
+    }
+  }
+}

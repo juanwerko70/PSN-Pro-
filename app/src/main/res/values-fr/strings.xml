@@ -1,0 +1,89 @@
+<resources>
+    <string name="app_name">PKG Forge</string>
+
+    <string name="nav_pkg_studio">PKG Studio</string>
+    <string name="nav_store">Boutique</string>
+    <string name="nav_ps4_remote">PS4 Distant</string>
+    <string name="nav_devops">DevOps</string>
+    <string name="nav_access">Accès</string>
+    <string name="nav_system">Système</string>
+
+    <string name="store_title">Boutique de Ressources PS4</string>
+    <string name="store_subtitle">Textures, mods, scripts, PKG et payloads prêts à télécharger ou importer sur PS4</string>
+    <string name="store_tab_cloud">Boutique Cloud</string>
+    <string name="store_tab_feeds">Catalogue Internet</string>
+    <string name="store_tab_ai">IA Créateur</string>
+    <string name="store_tab_publish">Publier</string>
+    <string name="store_search_hint">Rechercher par jeu, mod, fichier ou Title ID (CUSA...)</string>
+    <string name="store_empty_cloud">Aucun élément publié pour le moment. Les Admins ou Developers peuvent publier dans Publier ou utiliser Flux en Direct.</string>
+    <string name="store_empty_feed">Sélectionnez un dépôt PS4 ou saisissez owner/repo ou un flux HTTPS JSON et appuyez sur Sync.</string>
+
+    <string name="auth_title">Espace PKG Forge</string>
+    <string name="auth_subtitle">Modification de PKG PS4, studio 3D/textures, débogage FTP distant, CI/CD cloud et RBAC en temps réel.</string>
+    <string name="auth_sign_in_google">Se connecter avec Google</string>
+    <string name="auth_signing_in">Authentification...</string>
+    <string name="auth_security_note">Sécurisé par Google Identity et RBAC zero-trust Firestore</string>
+    <string name="sign_out">Déconnexion</string>
+
+    <string name="perm_denied_title">Permission Requise</string>
+    <string name="perm_denied_desc">Votre rôle actuel (%1$s) n\'inclut pas la permission %2$s. Demandez à un Administrateur de vous accorder l\'accès en temps réel.</string>
+    <string name="account_suspended_title">Compte Suspendu</string>
+    <string name="account_suspended_desc">Un administrateur a temporairement suspendu ce compte. Tous les outils sont verrouillés.</string>
+    <string name="role_admin">Administrateur</string>
+    <string name="role_developer">Développeur</string>
+    <string name="role_operator">Opérateur</string>
+    <string name="role_viewer">Lecteur</string>
+
+    <string name="pkg_tab_inspector">Inspecteur</string>
+    <string name="pkg_tab_sfo">PARAM.SFO</string>
+    <string name="pkg_tab_devfix">Dev Fix &amp; Hex</string>
+    <string name="pkg_tab_resources">Studio 3D/Tex</string>
+    <string name="pkg_import_btn">Importer .PKG</string>
+    <string name="pkg_import_sfo_btn">Importer .SFO</string>
+    <string name="pkg_create_sfo_btn">Modèle SFO</string>
+    <string name="pkg_export_sfo_btn">Exporter PARAM.SFO</string>
+    <string name="pkg_patch_copy_btn">Exporter PKG Patché</string>
+    <string name="pkg_empty_title">Aucun PKG chargé</string>
+    <string name="pkg_empty_desc">Importez un fichier .pkg PS4 ou PARAM.SFO pour inspecter les en-têtes, éditer les paramètres, corriger le SDK ou manipuler les textures et modèles 3D.</string>
+
+    <string name="res_mode_texture">Textures (DDS/PNG)</string>
+    <string name="res_mode_model">Modèles 3D (OBJ/FBX)</string>
+    <string name="res_import_texture">Importer DDS / PNG</string>
+    <string name="res_export_png">Exporter PNG</string>
+    <string name="res_export_dds">Exporter DDS</string>
+    <string name="res_import_model">Importer OBJ / FBX</string>
+    <string name="res_export_obj">Exporter OBJ</string>
+    <string name="res_export_fbx">Exporter FBX</string>
+
+    <string name="ps4_tab_ftp">Client FTP</string>
+    <string name="ps4_tab_klog">Debug Klog</string>
+    <string name="ps4_tab_proc">Processus &amp; RAM</string>
+    <string name="ps4_tab_hack">Cyber Lab</string>
+    <string name="ps4_connect">Connecter</string>
+    <string name="ps4_disconnect">Déconnecter</string>
+    <string name="ps4_upload_file">Envoyer Fichier</string>
+    <string name="ps4_download_file">Télécharger</string>
+    <string name="ps4_send_payload">Envoyer Payload (.bin)</string>
+
+    <string name="devops_title">VCS et Déploiement Cloud</string>
+    <string name="devops_fetch_repo">Sync Dépôt</string>
+    <string name="devops_trigger_deploy">Lancer Workflow</string>
+
+    <string name="admin_users_tab">Utilisateurs &amp; Rôles</string>
+    <string name="admin_audit_tab">Audit</string>
+    <string name="admin_releases_tab">Publier Version</string>
+    <string name="admin_my_profile">Mon Profil d\'Accès</string>
+    <string name="admin_publish_release">Publier Alerte Version</string>
+
+    <string name="sys_tab_diag">Diagnostics</string>
+    <string name="sys_tab_logs">Activité</string>
+    <string name="sys_tab_updates">Mises à jour</string>
+    <string name="sys_tab_settings">Paramètres</string>
+    <string name="settings_language">Langue</string>
+    <string name="settings_theme">Thème Visuel</string>
+    <string name="settings_glass_opacity">Opacité Liquid Glass</string>
+    <string name="update_available_banner">Nouvelle version disponible : v%1$s</string>
+    <string name="update_up_to_date">Application à jour (v%1$s)</string>
+    <string name="credits_sakura_badge">CRÉDITS • ÉDITION SAKURA</string>
+    <string name="credits_role_subtitle">Créateur &amp; Lead Hacker</string>
+</resources>
