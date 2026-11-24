@@ -14,9 +14,9 @@ jobs:
         with:
           distribution: temurin
           java-version: '17'
-      - uses: android-actions/setup-android@v3
-      - name: Prepare keystore and env
+      - name: Accept Android SDK licenses and prepare build files
         run: |
+          yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --licenses >/dev/null 2>&1 || true
           if [ -f debug.keystore.base64 ]; then
             base64 -d debug.keystore.base64 > debug.keystore
           else
@@ -26,8 +26,10 @@ jobs:
       - uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: '9.3.1'
-      - run: gradle assembleDebug --no-daemon
+      - name: Build Debug APK
+        run: gradle assembleDebug --no-daemon -Dorg.gradle.jvmargs="-Xmx3g -Dfile.encoding=UTF-8"
       - uses: actions/upload-artifact@v4
         with:
           name: PKG-Forge-APK
           path: app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: error
